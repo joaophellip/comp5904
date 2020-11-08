@@ -10,9 +10,15 @@ modeling earthquake damage : [link aqui](https://www.drivendata.org/competitions
  - `trainingDataset_earthquake.csv` contém os dados de treinamento para a competição modeling earthquake damage.
  - `testDataset_earthquase.csv` contém os dados de teste para a competição modeling earthquake damage.
 
-* src : contém os arquivos fonte do projeto.
+* src : contém os arquivos .R do projeto.
  - `data` contém scripts para carregar e pré processar os arquivos csv.
- - `models` contém scripts para implementação dos modelos de aprendizagem
+ - `models` contém scripts para implementar os modelos de aprendizagem
 
 * models
- - `lda` contém scripts para implementação de Linear Discriminant Analysis
+ - `lm` contém scripts para implementação de Regressão Linear sobre uma matriz indicadora
+
+*  utils (??)
+
+## execução dos scripts
+
+para gerar predições para cada modelo, basta rodar os arquivos index.R dentro das pastas que identificam os modelos.
