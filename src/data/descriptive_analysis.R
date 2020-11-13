@@ -218,9 +218,6 @@ prop.table(table(damage$land_surface_condition,
 # são semelhantes sugerindo o tipo de dano independe da condição da 
 # superfície
 
-p1 <- paste( round(100*prop.table(table(damage$land_surface_condition,
-                 damage$damage_grade), margin = 1), 2), "%")
-
 damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -229,9 +226,11 @@ damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
+  coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Condição da superfície", y = "Número de construções")
-
-# ------ OBS: Gostaria de colocar as porporções p1 em cima de cada barra
 
 ---
 
@@ -244,7 +243,14 @@ damage %>% ggplot(aes(x = foundation_type, group = damage_grade)) +
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
+  coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de fundação", y = "Número de construções")
+
+# Proporções dos tipos de fundação
+round(100*prop.table(table(damage$foundation_type)), 2)
 
 # Proporções de dano dentro de cada nível dos tipos de fundação
 prop.table(table(damage$foundation_type,
@@ -254,7 +260,7 @@ prop.table(table(damage$foundation_type,
 # associação entre as variáveis.
 
 # As fundações "h" e "r" apresentaram maiores danos do tipo severo,
-# enquanto que cerca de 97,91% de construções com tipo de fundação
+# enquanto que cerca de 98% de construções com tipo de fundação
 # "i" sofreram danos de leves a médios.
 
 ---
@@ -268,8 +274,15 @@ damage %>% ggplot(aes(x = ground_floor_type, group = damage_grade)) +
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
+  coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de andar térreo", y = "Número de construções")
 
+
+# Proporções dos tipos de andar térreo
+round(100*prop.table(table(damage$ground_floor_type)), 2)
 
 # Proporções de dano dentro de cada nível do tipo de andar térreo
 prop.table(table(damage$ground_floor_type,
@@ -289,6 +302,10 @@ damage %>% ggplot(aes(x = other_floor_type, group = damage_grade)) +
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
+  coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de piso utilizado (exceto telhado e térreo)", y = "Número de construções")
 
 # Proporções de dano dentro de cada nível do tipo de piso
@@ -310,6 +327,10 @@ prop.table(table(damage$other_floor_type,
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
+  coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de telhado", y = "Número de construções")
 
 # Proporções de dano dentro de cada nível do tipo de telhado
@@ -333,6 +354,10 @@ damage %>% ggplot(aes(x = position, group = damage_grade)) +
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
+  coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Posição", y = "Número de construções")
 
 # Proporções de dano dentro de cada nível da posição
@@ -358,7 +383,6 @@ damage %>% ggplot(aes(x = plan_configuration, group = damage_grade)) +
 prop.table(table(damage$plan_configuration,
                  damage$damage_grade), margin = 1)
 
-# Há um indicativo de associação
 
 ---
 
