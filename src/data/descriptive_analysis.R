@@ -259,29 +259,6 @@ prop.table(table(damage$foundation_type,
 
 ---
 
-### Tipo de telhado -- roof_type
-damage %>% ggplot(aes(x = roof_type, group = damage_grade)) +
-  theme_classic() +
-  theme(legend.position = "top") +
-  geom_bar(aes(fill = damage_grade), position = "dodge") + 
-  scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
-                    values = c("low"  = "#482677FF",
-                               "medium" = "#2D708EFF",
-                               "severe" = "#73D055FF")) +
-  labs(fill = "Grau de dano", x = "Tipo de telhado", y = "Número de construções")
-
-# Proporções de dano dentro de cada nível do tipo de telhado
-prop.table(table(damage$roof_type,
-                 damage$damage_grade), margin = 1)
-
-# As proporções de dano dentro de cada nível do tipo de telhado sugerem
-# associação entre as variáveis.
-
-# Construções com o tipo de telhado "x" sofreram menos dados severos do
-# que construções com outros tipos de telhados.
-
----
-
 ### Tipo de andar térreo -- ground_floor_type
 damage %>% ggplot(aes(x = ground_floor_type, group = damage_grade)) +
   theme_classic() +
@@ -321,6 +298,29 @@ prop.table(table(damage$other_floor_type,
 # Aqui é possível perceber que construções com tipo de piso "s" sofreram
 # menos danos severos em comparação com os outros tipos. As construções
 # com pisos "q" e "x" destacam-se pelos altos níveis de danos sofridos.
+
+---
+
+  ### Tipo de telhado -- roof_type
+  damage %>% ggplot(aes(x = roof_type, group = damage_grade)) +
+  theme_classic() +
+  theme(legend.position = "top") +
+  geom_bar(aes(fill = damage_grade), position = "dodge") + 
+  scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
+                    values = c("low"  = "#482677FF",
+                               "medium" = "#2D708EFF",
+                               "severe" = "#73D055FF")) +
+  labs(fill = "Grau de dano", x = "Tipo de telhado", y = "Número de construções")
+
+# Proporções de dano dentro de cada nível do tipo de telhado
+prop.table(table(damage$roof_type,
+                 damage$damage_grade), margin = 1)
+
+# As proporções de dano dentro de cada nível do tipo de telhado sugerem
+# associação entre as variáveis.
+
+# Construções com o tipo de telhado "x" sofreram menos dados severos do
+# que construções com outros tipos de telhados.
 
 ---
   
