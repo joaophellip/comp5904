@@ -10,14 +10,16 @@ damage <- as_tibble(cbind(data$dataset,
                           damage_grade = factor(data$class_response, 
                                         labels = c("low", "medium", "severe"))))
 
-# Transformando as variáveis area_percentage e heigh_percentage em dbl
-damage <- damage %>% mutate(area_percentage = as.double(area_percentage),
-                            height_percentage = as.double(height_percentage))
+# Separando entre conjunto de treinamento e teste
+set.seed(135)
+index <- sample(1:260601, ceiling(0.6 * 260601))
+damage_test <- damage[-index, ]
+damage <- damage[index, ]
 
 # Estrutura 
 glimpse(damage)
 
-# Análise descritiva -----------------------------------------------------------
+# Análise descritiva no conjunto de treinamento --------------------------------
 
 ### Resposta
 damage %>% ggplot(aes(x = damage_grade)) +
@@ -31,11 +33,14 @@ damage %>% ggplot(aes(x = damage_grade)) +
 # Proporções
 round(100 * prop.table(table(damage$damage_grade)), 2)
 
+---
+
 ### Região geográfica mais geral -- geo_level_1_id
 damage %>% ggplot(aes(x = geo_level_1_id, fill = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade)) + 
+  scale_x_discrete(breaks = seq(0, 30, 5)) +
   scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
@@ -49,6 +54,54 @@ damage %>% ggplot(aes(x = geo_level_1_id, fill = damage_grade)) +
 # As regiões em que a maioria das construções soferam danos mais severos
 # foram as regiões 8, 17, 18 e 21. Entre elas destaca-se a região 17
 
+# Proporções dos danos dentro de cada região
+round(100 * prop.table(table(damage$geo_level_1_id, damage$damage_grade), 1), 2)
+
+---
+
+### Área -- area_percentage
+damage %>% ggplot(aes(x = damage_grade, y = area_percentage)) +
+  theme_classic() +
+  geom_boxplot() + 
+  scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
+  labs(x = "Grau de dano",
+       y = "Área normalizada")
+  
+damage %>% ggplot(aes(x = area_percentage, fill = damage_grade)) +
+  theme_classic() +
+  theme(legend.position = "top") +
+  geom_bar(position = "dodge") + 
+  scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
+                    values = c("low"  = "#482677FF",
+                               "medium" = "#2D708EFF",
+                               "severe" = "#73D055FF")) +
+  labs(fill = "Grau de dano",
+       x = "Área normalizada", y = "Frequência")
+
+---
+
+### Altura -- height_percentage
+damage %>% ggplot(aes(x = damage_grade, y = height_percentage)) +
+  theme_classic() +
+  geom_boxplot() + 
+  scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
+  labs(x = "Grau de dano",
+       y = "Altura normalizada")
+
+damage %>% ggplot(aes(x = height_percentage, fill = damage_grade)) +
+  theme_classic() +
+  theme(legend.position = "top") +
+  geom_bar(position = "dodge") + 
+  scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
+                    values = c("low"  = "#482677FF",
+                               "medium" = "#2D708EFF",
+                               "severe" = "#73D055FF")) +
+  labs(fill = "Grau de dano",
+       x = "Altura normalizada", y = "Frequência")
+
+
+
+---
 
 ### Número de andares antes do terremoto -- count_floors_pre_eq
 damage %>% ggplot(aes(x = count_floors_pre_eq, fill = damage_grade)) +
@@ -73,6 +126,8 @@ quantile(damage$count_floors_pre_eq, probs = 0.95)
 
 # Proporções de dano dentro de cada nível dos andares
 prop.table(table(damage$count_floors_pre_eq, damage$damage_grade), margin = 1)
+
+---
 
 ### Idade -- age
 damage %>% ggplot(aes(x = age, group = damage_grade)) +
@@ -100,42 +155,7 @@ damage %>% filter(age < 250) %>%
 # Note que o número de construções que sofreram danos leves decai
 # exponencialmente quando a idade aumenta
 
-### Área -- area_percentage
-damage %>% ggplot(aes(x = damage_grade, y = area_percentage)) +
-  theme_classic() +
-  geom_boxplot() + 
-  scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
-  labs(x = "Grau de dano",
-       y = "Área normalizada")
-
-damage %>% ggplot(aes(x = area_percentage, fill = damage_grade)) +
-  theme_classic() +
-  theme(legend.position = "top") +
-  geom_bar(position = "dodge") + 
-  scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
-                    values = c("low"  = "#482677FF",
-                               "medium" = "#2D708EFF",
-                               "severe" = "#73D055FF")) +
-  labs(fill = "Grau de dano",
-       x = "Área normalizada", y = "Frequência")
-
-### Altura -- height_percentage
-damage %>% ggplot(aes(x = damage_grade, y = height_percentage)) +
-  theme_classic() +
-  geom_boxplot() + 
-  scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
-  labs(x = "Grau de dano",
-       y = "Altura normalizada")
-
-damage %>% ggplot(aes(x = height_percentage, fill = damage_grade)) +
-  theme_classic() +
-  theme(legend.position = "top") +
-  geom_bar(position = "dodge") + 
-  scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
-                    values = c("low"  = "#482677FF",
-                               "medium" = "#2D708EFF",
-                               "severe" = "#73D055FF")) +
-  labs(x = "Altura normalizada", y = "Frequência")
+---
 
 ### Condição da superfície -- land_surface_condition
 damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
@@ -155,6 +175,8 @@ prop.table(table(damage$land_surface_condition,
 # Note que dentro de cada nível das condições as proporções de danos
 # são semelhantes sugerindo o tipo de dano independe da condição da 
 # superfície
+
+---
 
 ### Tipo de fundação - foundation_type
 damage %>% ggplot(aes(x = foundation_type, group = damage_grade)) +
@@ -178,6 +200,8 @@ prop.table(table(damage$foundation_type,
 # enquanto que cerca de 97,91% de construções com tipo de fundação
 # "i" sofreram danos de leves a médios.
 
+---
+
 ### Tipo de telhado -- roof_type
 damage %>% ggplot(aes(x = roof_type, group = damage_grade)) +
   theme_classic() +
@@ -199,6 +223,8 @@ prop.table(table(damage$roof_type,
 # Construções com o tipo de telhado "x" sofreram menos dados severos do
 # que construções com outros tipos de telhados.
 
+---
+
 ### Tipo de andar térreo -- ground_floor_type
 damage %>% ggplot(aes(x = ground_floor_type, group = damage_grade)) +
   theme_classic() +
@@ -217,6 +243,8 @@ prop.table(table(damage$ground_floor_type,
 
 # As proporções sugerem associação. Consruções com o tipo de andar térreo
 # "f" e "x" sofreram danos semelhantes.
+
+---
 
 ### Tipo de piso utilizado (exceto telhado e térreo) -- other_floor_type
 damage %>% ggplot(aes(x = other_floor_type, group = damage_grade)) +
@@ -237,7 +265,9 @@ prop.table(table(damage$other_floor_type,
 # menos danos severos em comparação com os outros tipos. As construções
 # com pisos "q" e "x" destacam-se pelos altos níveis de danos sofridos.
 
-# Posição -- position
+---
+  
+### Posição -- position
 damage %>% ggplot(aes(x = position, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -273,6 +303,8 @@ prop.table(table(damage$plan_configuration,
 
 # Há um indicativo de associação
 
+---
+
 ### Status -- legal_ownership_status
 damage %>% ggplot(aes(x = legal_ownership_status, group = damage_grade)) +
   theme_classic() +
@@ -293,6 +325,8 @@ prop.table(table(damage$legal_ownership_status,
 # tiveram mais danos leves e menos danos severos do que construções com
 # status "w".
 
+---
+
 ### Número de famílias -- count_families
 damage %>% ggplot(aes(x = count_families, group = damage_grade)) +
   theme_classic() +
@@ -311,6 +345,8 @@ prop.table(table(damage$count_families,
 # Levando em conta que existem poucas construções com mais de 6 famílias, 
 # não parece haver associação entre o grau de dano e o número de famílias
 # vivendo na construção. 
+
+---
 
 ### Superstructure
 
@@ -375,6 +411,8 @@ ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) +
                                "3" = "#73D055FF")) +
   labs(fill = "Grau de dano", x = "Superestrutura",
        y = "Distribuição do grau de dano")
+
+---
 
 ### Secondary use
 
