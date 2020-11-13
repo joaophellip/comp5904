@@ -60,13 +60,16 @@ round(100 * prop.table(table(damage$geo_level_1_id, damage$damage_grade), 1), 2)
 ---
 
 ### Área -- area_percentage
+
+# Boxplot  
 damage %>% ggplot(aes(x = damage_grade, y = area_percentage)) +
   theme_classic() +
   geom_boxplot() + 
   scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
   labs(x = "Grau de dano",
        y = "Área normalizada")
-  
+
+# Barplot  
 damage %>% ggplot(aes(x = area_percentage, fill = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -81,6 +84,8 @@ damage %>% ggplot(aes(x = area_percentage, fill = damage_grade)) +
 ---
 
 ### Altura -- height_percentage
+  
+# Boxplot
 damage %>% ggplot(aes(x = damage_grade, y = height_percentage)) +
   theme_classic() +
   geom_boxplot() + 
@@ -88,6 +93,7 @@ damage %>% ggplot(aes(x = damage_grade, y = height_percentage)) +
   labs(x = "Grau de dano",
        y = "Altura normalizada")
 
+# Barplot
 damage %>% ggplot(aes(x = height_percentage, fill = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -99,11 +105,20 @@ damage %>% ggplot(aes(x = height_percentage, fill = damage_grade)) +
   labs(fill = "Grau de dano",
        x = "Altura normalizada", y = "Frequência")
 
-
-
 ---
 
 ### Número de andares antes do terremoto -- count_floors_pre_eq
+
+# Boxplot
+damage %>% ggplot(aes(x = damage_grade, y = count_floors_pre_eq)) +
+  theme_classic() +
+  geom_boxplot() + 
+  scale_y_continuous(breaks = 1:9) +
+  scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
+  labs(x = "Grau de dano",
+       y = "Número de andares")
+
+# Barplot
 damage %>% ggplot(aes(x = count_floors_pre_eq, fill = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -115,6 +130,9 @@ damage %>% ggplot(aes(x = count_floors_pre_eq, fill = damage_grade)) +
   scale_x_continuous(breaks = 1:9) +
   labs(fill = "Grau de dano", x = "Número de andares",
        y = "Número de construções")
+
+# Summary
+summary(damage$count_floors_pre_eq); sd(damage$count_floors_pre_eq)
 
 # Tabela de frequências
 table(damage$count_floors_pre_eq)
@@ -130,6 +148,27 @@ prop.table(table(damage$count_floors_pre_eq, damage$damage_grade), margin = 1)
 ---
 
 ### Idade -- age
+
+# Boxplot  
+damage %>% ggplot(aes(x = damage_grade, y = age)) +
+  theme_classic() +
+  geom_boxplot() + 
+  scale_y_continuous(breaks = 1:9) +
+  scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
+  labs(x = "Grau de dano",
+       y = "Idade")
+
+# Retirando os outliers
+damage %>% filter(age < 200) %>% 
+ggplot(aes(x = damage_grade, y = age)) +
+  theme_classic() +
+  geom_boxplot() + 
+  scale_y_continuous(breaks = 1:9) +
+  scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
+  labs(x = "Grau de dano",
+       y = "Idade")  
+
+# Barplots
 damage %>% ggplot(aes(x = age, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -155,9 +194,33 @@ damage %>% filter(age < 250) %>%
 # Note que o número de construções que sofreram danos leves decai
 # exponencialmente quando a idade aumenta
 
+# Summary
+summary(damage$age); sd(damage$age)
+
+# Tabela de frequências
+table(damage$age)
+
+# Distribuição das construções com idade igual a 995
+prop.table(table(damage$damage_grade[which(damage$age == 995)]))
+
 ---
 
 ### Condição da superfície -- land_surface_condition
+  
+# Distribuição geral
+prop.table(table(damage$land_surface_condition))
+  
+# Proporções de dano dentro de cada nível das condições
+prop.table(table(damage$land_surface_condition,
+                   damage$damage_grade), margin = 1)
+
+# Note que dentro de cada nível das condições as proporções de danos
+# são semelhantes sugerindo o tipo de dano independe da condição da 
+# superfície
+
+p1 <- paste( round(100*prop.table(table(damage$land_surface_condition,
+                 damage$damage_grade), margin = 1), 2), "%")
+
 damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -168,13 +231,7 @@ damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
                                "severe" = "#73D055FF")) +
   labs(fill = "Grau de dano", x = "Condição da superfície", y = "Número de construções")
 
-# Proporções de dano dentro de cada nível das condições
-prop.table(table(damage$land_surface_condition,
-                 damage$damage_grade), margin = 1)
-
-# Note que dentro de cada nível das condições as proporções de danos
-# são semelhantes sugerindo o tipo de dano independe da condição da 
-# superfície
+# ------ OBS: Gostaria de colocar as porporções p1 em cima de cada barra
 
 ---
 
