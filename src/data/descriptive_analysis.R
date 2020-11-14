@@ -22,21 +22,20 @@ glimpse(damage)
 # Análise descritiva no conjunto de treinamento --------------------------------
 
 ### Resposta
-damage %>% ggplot(aes(x = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar() + 
   scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
   labs(x = "Grau de dano",
        y = "Número de construções")
+print(graph)
 
 # Proporções
 round(100 * prop.table(table(damage$damage_grade)), 2)
 
----
-
 ### Região geográfica mais geral -- geo_level_1_id
-damage %>% ggplot(aes(x = geo_level_1_id, fill = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = geo_level_1_id, fill = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade)) + 
@@ -47,6 +46,7 @@ damage %>% ggplot(aes(x = geo_level_1_id, fill = damage_grade)) +
                                "severe" = "#73D055FF")) +
   labs(fill = "Grau de dano", x = "Região geográfica",
        y = "Número de construções")
+print(graph)
 
 # A grande maioria das regiões apresentam construções que sofreram
 # um dano médio;
@@ -57,12 +57,12 @@ damage %>% ggplot(aes(x = geo_level_1_id, fill = damage_grade)) +
 # Proporções dos danos dentro de cada região
 round(100 * prop.table(table(damage$geo_level_1_id, damage$damage_grade), 1), 2)
 
----
 
 ### Área -- area_percentage
 
-# Boxplot  
-damage %>% ggplot(aes(x = damage_grade, y = area_percentage)) +
+# Boxplot
+
+graph <- damage %>% ggplot(aes(x = damage_grade, y = area_percentage)) +
   theme_classic() +
   geom_boxplot() + 
   scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
@@ -81,12 +81,10 @@ damage %>% ggplot(aes(x = area_percentage, fill = damage_grade)) +
   labs(fill = "Grau de dano",
        x = "Área normalizada", y = "Frequência")
 
----
-
 ### Altura -- height_percentage
   
 # Boxplot
-damage %>% ggplot(aes(x = damage_grade, y = height_percentage)) +
+graph <- damage %>% ggplot(aes(x = damage_grade, y = height_percentage)) +
   theme_classic() +
   geom_boxplot() + 
   scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
@@ -94,7 +92,7 @@ damage %>% ggplot(aes(x = damage_grade, y = height_percentage)) +
        y = "Altura normalizada")
 
 # Barplot
-damage %>% ggplot(aes(x = height_percentage, fill = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = height_percentage, fill = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(position = "dodge") + 
@@ -105,12 +103,10 @@ damage %>% ggplot(aes(x = height_percentage, fill = damage_grade)) +
   labs(fill = "Grau de dano",
        x = "Altura normalizada", y = "Frequência")
 
----
-
 ### Número de andares antes do terremoto -- count_floors_pre_eq
 
 # Boxplot
-damage %>% ggplot(aes(x = damage_grade, y = count_floors_pre_eq)) +
+graph <- damage %>% ggplot(aes(x = damage_grade, y = count_floors_pre_eq)) +
   theme_classic() +
   geom_boxplot() + 
   scale_y_continuous(breaks = 1:9) +
@@ -119,7 +115,7 @@ damage %>% ggplot(aes(x = damage_grade, y = count_floors_pre_eq)) +
        y = "Número de andares")
 
 # Barplot
-damage %>% ggplot(aes(x = count_floors_pre_eq, fill = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = count_floors_pre_eq, fill = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -130,6 +126,7 @@ damage %>% ggplot(aes(x = count_floors_pre_eq, fill = damage_grade)) +
   scale_x_continuous(breaks = 1:9) +
   labs(fill = "Grau de dano", x = "Número de andares",
        y = "Número de construções")
+print(graph)
 
 # Summary
 summary(damage$count_floors_pre_eq); sd(damage$count_floors_pre_eq)
@@ -145,31 +142,33 @@ quantile(damage$count_floors_pre_eq, probs = 0.95)
 # Proporções de dano dentro de cada nível dos andares
 prop.table(table(damage$count_floors_pre_eq, damage$damage_grade), margin = 1)
 
----
 
 ### Idade -- age
 
 # Boxplot  
-damage %>% ggplot(aes(x = damage_grade, y = age)) +
+graph <- damage %>% ggplot(aes(x = damage_grade, y = age)) +
   theme_classic() +
   geom_boxplot() + 
   scale_y_continuous(breaks = 1:9) +
   scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
   labs(x = "Grau de dano",
        y = "Idade")
+print(graph)
 
 # Retirando os outliers
-damage %>% filter(age < 200) %>% 
-ggplot(aes(x = damage_grade, y = age)) +
+graph <- damage %>% dplyr::filter(age < 200) %>% 
+  ggplot(aes(x = damage_grade, y = age)) +
   theme_classic() +
   geom_boxplot() + 
   scale_y_continuous(breaks = 1:9) +
   scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
   labs(x = "Grau de dano",
-       y = "Idade")  
+       y = "Idade")
+print(graph)
 
 # Barplots
-damage %>% ggplot(aes(x = age, group = damage_grade)) +
+graph <- damage %>% 
+  ggplot(aes(x = age, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -180,7 +179,7 @@ damage %>% ggplot(aes(x = age, group = damage_grade)) +
   labs(fill = "Grau de dano", x = "Idade", y = "Número de construções")
 
 # Retirando o outlier
-damage %>% filter(age < 250) %>% 
+graph <- damage %>% filter(age < 250) %>% 
   ggplot(aes(x = age, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
@@ -203,7 +202,6 @@ table(damage$age)
 # Distribuição das construções com idade igual a 995
 prop.table(table(damage$damage_grade[which(damage$age == 995)]))
 
----
 
 ### Condição da superfície -- land_surface_condition
   
@@ -218,7 +216,7 @@ prop.table(table(damage$land_surface_condition,
 # são semelhantes sugerindo o tipo de dano independe da condição da 
 # superfície
 
-damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -231,11 +229,10 @@ damage %>% ggplot(aes(x = land_surface_condition, group = damage_grade)) +
             stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
   coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Condição da superfície", y = "Número de construções")
-
----
+print(graph)
 
 ### Tipo de fundação - foundation_type
-damage %>% ggplot(aes(x = foundation_type, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = foundation_type, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -248,6 +245,7 @@ damage %>% ggplot(aes(x = foundation_type, group = damage_grade)) +
             stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
   coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de fundação", y = "Número de construções")
+print(graph)
 
 # Proporções dos tipos de fundação
 round(100*prop.table(table(damage$foundation_type)), 2)
@@ -263,10 +261,9 @@ prop.table(table(damage$foundation_type,
 # enquanto que cerca de 98% de construções com tipo de fundação
 # "i" sofreram danos de leves a médios.
 
----
 
 ### Tipo de andar térreo -- ground_floor_type
-damage %>% ggplot(aes(x = ground_floor_type, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = ground_floor_type, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -279,7 +276,7 @@ damage %>% ggplot(aes(x = ground_floor_type, group = damage_grade)) +
             stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
   coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de andar térreo", y = "Número de construções")
-
+print(graph)
 
 # Proporções dos tipos de andar térreo
 round(100*prop.table(table(damage$ground_floor_type)), 2)
@@ -291,10 +288,9 @@ prop.table(table(damage$ground_floor_type,
 # As proporções sugerem associação. Consruções com o tipo de andar térreo
 # "f" e "x" sofreram danos semelhantes.
 
----
 
 ### Tipo de piso utilizado (exceto telhado e térreo) -- other_floor_type
-damage %>% ggplot(aes(x = other_floor_type, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = other_floor_type, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -307,6 +303,7 @@ damage %>% ggplot(aes(x = other_floor_type, group = damage_grade)) +
             stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
   coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de piso utilizado (exceto telhado e térreo)", y = "Número de construções")
+print(graph)
 
 # Proporções de dano dentro de cada nível do tipo de piso
 prop.table(table(damage$other_floor_type,
@@ -316,10 +313,9 @@ prop.table(table(damage$other_floor_type,
 # menos danos severos em comparação com os outros tipos. As construções
 # com pisos "q" e "x" destacam-se pelos altos níveis de danos sofridos.
 
----
 
   ### Tipo de telhado -- roof_type
-  damage %>% ggplot(aes(x = roof_type, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = roof_type, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -332,6 +328,7 @@ prop.table(table(damage$other_floor_type,
             stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
   coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Tipo de telhado", y = "Número de construções")
+print(graph)
 
 # Proporções de dano dentro de cada nível do tipo de telhado
 prop.table(table(damage$roof_type,
@@ -343,10 +340,9 @@ prop.table(table(damage$roof_type,
 # Construções com o tipo de telhado "x" sofreram menos dados severos do
 # que construções com outros tipos de telhados.
 
----
   
 ### Posição -- position
-damage %>% ggplot(aes(x = position, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = position, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -359,6 +355,7 @@ damage %>% ggplot(aes(x = position, group = damage_grade)) +
             stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
   coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Posição", y = "Número de construções")
+print(graph)
 
 # Proporções de dano dentro de cada nível da posição
 prop.table(table(damage$position,
@@ -369,7 +366,7 @@ prop.table(table(damage$position,
 # independe da posição da construção 
 
 # Configuração do plano de construção -- plan_configuration
-damage %>% ggplot(aes(x = plan_configuration, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = plan_configuration, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -384,10 +381,8 @@ prop.table(table(damage$plan_configuration,
                  damage$damage_grade), margin = 1)
 
 
----
-
 ### Status -- legal_ownership_status
-damage %>% ggplot(aes(x = legal_ownership_status, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = legal_ownership_status, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -406,10 +401,9 @@ prop.table(table(damage$legal_ownership_status,
 # tiveram mais danos leves e menos danos severos do que construções com
 # status "w".
 
----
 
 ### Número de famílias -- count_families
-damage %>% ggplot(aes(x = count_families, group = damage_grade)) +
+graph <- damage %>% ggplot(aes(x = count_families, group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -426,8 +420,6 @@ prop.table(table(damage$count_families,
 # Levando em conta que existem poucas construções com mais de 6 famílias, 
 # não parece haver associação entre o grau de dano e o número de famílias
 # vivendo na construção. 
-
----
 
 ### Superstructure
 
@@ -470,7 +462,7 @@ Cat <- seq(1, 4, 1)
 tab_f <- cbind(tab_f, Cat)
 plot_teste <- melt(tab_f, id.vars = "Cat")
 plot_teste_fim <- plot_teste[plot_teste$Cat < 4,]
-plot_teste_fim_sor <- arrange(plot_teste_fim, variable, desc(Cat)) 
+plot_teste_fim_sor <- plyr::arrange(plot_teste_fim, variable, desc(Cat)) 
 plot_teste_fim2 <- ddply(plot_teste_fim_sor, "variable",
                          transform,
                          label_ypos = cumsum(value))
@@ -479,7 +471,7 @@ plot_teste_fim2 <- ddply(plot_teste_fim_sor, "variable",
 # influenciam o nível de dano. De repente cabe mencionar na análise quando
 # o percentual de 1 foi menor que o de 3 e quando não.
 # E destacar a distribuição da 'has_superstructure_rc_engineered'.
-ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) + 
+graph <- ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) + 
   geom_bar(stat = "identity") + 
   theme_classic() + 
   theme(legend.position = "top", 
@@ -492,8 +484,6 @@ ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) +
                                "3" = "#73D055FF")) +
   labs(fill = "Grau de dano", x = "Superestrutura",
        y = "Distribuição do grau de dano")
-
----
 
 ### Secondary use
 
@@ -531,7 +521,7 @@ Cat <- seq(1, 4, 1)
 tab_f<-cbind(tab_f, Cat)
 plot_teste<-melt(tab_f, id.vars = "Cat")
 plot_teste_fim<- plot_teste[plot_teste$Cat < 4,]
-plot_teste_fim_sor <- arrange(plot_teste_fim, variable, desc(Cat)) 
+plot_teste_fim_sor <- plyr::arrange(plot_teste_fim, variable, desc(Cat)) 
 plot_teste_fim2 <- ddply(plot_teste_fim_sor, "variable",
                          transform, label_ypos=cumsum(value))
 
@@ -540,7 +530,7 @@ plot_teste_fim2 <- ddply(plot_teste_fim_sor, "variable",
 # De repente cabe mencionar na análise quando o percentual de 1 foi menor
 # que o de 3 e quando não.
 
-ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) + 
+graph <- ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) + 
   geom_bar(stat = "identity") + 
   theme_classic() + 
   theme(legend.position = "top", 
@@ -554,5 +544,4 @@ ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) +
   labs(fill = "Grau de dano", x = "Uso secundário",
        y = "Distribuição do grau de dano")
 
-
-
+remove(list=c("graph"))
