@@ -6,12 +6,17 @@ if (!require("mclust")) {
   install.packages("mclust")
   library("mclust")
 }
+source("src/data/earthquake_damage.R")
 
 cat("----plotting pairwise scatter----\n")
 
-clPairs(dataset[1:1000, 2:4], cl = predictedDamage$damage_grade[1:1000])
+data <- Earthquake_data()
+data$generate()
 
-clp <- clPairs(dataset[1:1000, 2:4], cl = predictedDamage$damage_grade[1:1000],
+# plotting pairwise scatter for variables 1 and 4
+clPairs(data$dataset[, c(1,4)], cl = data$class_response)
+
+clp <- clPairs(data$dataset[, c(1,4)], cl = data$class_response,
                lower.panel = NULL)
 
 clPairsLegend(0.1, 0.3, class = c("low", "medium", "severe"),
