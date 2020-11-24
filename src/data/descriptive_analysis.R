@@ -1,4 +1,5 @@
 library(tidyverse)
+library(ggcorrplot)
 
 source("src/data/earthquake_damage.R")
 
@@ -27,12 +28,23 @@ graph <- damage %>% ggplot(aes(x = damage_grade)) +
   theme(legend.position = "top") +
   geom_bar() + 
   scale_x_discrete(labels = c("Baixo", "Médio", "Severo")) +
+#  geom_text(aes(y =..count..,
+#                label = scales::percent(..count../sum(..count..), accuracy = 0.01)),
+#            position = position_dodge(0.9), vjust = -0.9, size = 3.5, stat="count") +
+#  coord_cartesian(ylim = c(0, 100000)) +
   labs(x = "Grau de dano",
        y = "Número de construções")
 print(graph)
 
 # Proporções
 round(100 * prop.table(table(damage$damage_grade)), 2)
+
+### Correlação entre as variáveis quantitativas
+ggcorrplot(cor(damage %>% select(age, area_percentage, height_percentage,
+                                 count_families, count_floors_pre_eq)),
+           hc.order = TRUE, type = "upper",
+           outline.col = "white", ggtheme = "theme_void",
+           lab = TRUE )
 
 ### Região geográfica mais geral -- geo_level_1_id
 graph <- damage %>% ggplot(aes(x = geo_level_1_id, fill = damage_grade)) +
@@ -124,6 +136,10 @@ graph <- damage %>% ggplot(aes(x = count_floors_pre_eq, fill = damage_grade)) +
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
   scale_x_continuous(breaks = 1:9) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 1) +
+  coord_cartesian(ylim = c(0, 60000)) +
   labs(fill = "Grau de dano", x = "Número de andares",
        y = "Número de construções")
 print(graph)
@@ -357,10 +373,6 @@ graph <- damage %>% ggplot(aes(x = position, group = damage_grade)) +
   labs(fill = "Grau de dano", x = "Posição", y = "Número de construções")
 print(graph)
 
-# Proporções de dano dentro de cada nível da posição
-prop.table(table(damage$position,
-                 damage$damage_grade), margin = 1)
-
 # As distribuições dos danos sofridos em cada nível da posição 
 # são relativamente semelhantes entre si, indicando que o dano sofrido
 # independe da posição da construção 
@@ -375,11 +387,14 @@ graph <- damage %>% ggplot(aes(x = plan_configuration, group = damage_grade)) +
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
   labs(fill = "Grau de dano", x = "Configuração do plano de construção", y = "Número de construções")
+print(graph)
 
 # Proporções de dano dentro de cada nível da configuração do plano
 prop.table(table(damage$plan_configuration,
                  damage$damage_grade), margin = 1)
 
+# Número de observações em cada classe
+table(damage$plan_configuration)
 
 ### Status -- legal_ownership_status
 graph <- damage %>% ggplot(aes(x = legal_ownership_status, group = damage_grade)) +
@@ -391,10 +406,13 @@ graph <- damage %>% ggplot(aes(x = legal_ownership_status, group = damage_grade)
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
   labs(fill = "Grau de dano", x = "Status legal de propriedade do terreno", y = "Número de construções")
+print(graph)
 
 # Proporções de dano dentro de cada nível do status
 prop.table(table(damage$legal_ownership_status,
                  damage$damage_grade), margin = 1)
+
+table(damage$legal_ownership_status)
 
 # As porporções sugerem que os danos sofridos possuem associação com
 # o status legal da construção. Note que construções com status "a"
@@ -412,6 +430,7 @@ graph <- damage %>% ggplot(aes(x = count_families, group = damage_grade)) +
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
   labs(fill = "Grau de dano", x = "Número de famílias", y = "Número de construções")
+print(graph)
 
 # Proporções de dano dentro de cada nível do número de famílias
 prop.table(table(damage$count_families,
@@ -471,12 +490,16 @@ plot_teste_fim2 <- ddply(plot_teste_fim_sor, "variable",
 # influenciam o nível de dano. De repente cabe mencionar na análise quando
 # o percentual de 1 foi menor que o de 3 e quando não.
 # E destacar a distribuição da 'has_superstructure_rc_engineered'.
+y_pos <- matrix(plot_teste_fim2$label_ypos, nrow = 3)
+y_pos[2, ] <- apply(y_pos, 2, diff)[1,]/2 + y_pos[1, ]
+y_pos[1, ] <- 5.78
+y_pos[3, ] <- 99.5
 graph <- ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) + 
   geom_bar(stat = "identity") + 
   theme_classic() + 
   theme(legend.position = "top", 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8)) +
-  geom_text(aes(y = label_ypos, label = value),
+  geom_text(aes(y = y_pos, label = value),
                 vjust = 0.9, color = "white", size = 3.5) + 
   scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
                     values = c("1"  = "#482677FF",
@@ -485,6 +508,7 @@ graph <- ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat)
   labs(fill = "Grau de dano", x = "Superestrutura",
        y = "Distribuição do grau de dano")
 
+print(graph)
 ### Secondary use
 
 # ANA:
@@ -502,7 +526,7 @@ tab6 <- colPerc(xtabs(~damage_grade+has_secondary_use_industry,data=damage))
 tab7 <- colPerc(xtabs(~damage_grade+has_secondary_use_health_post,data=damage))
 tab8 <- colPerc(xtabs(~damage_grade+has_secondary_use_gov_office,data=damage))
 tab9 <- colPerc(xtabs(~damage_grade+has_secondary_use_use_police,data=damage))
-tab10 <- colPerc(xtabs(~damage_grade+has_secondary_use_other,data=damage))
+tab10 <-colPerc(xtabs(~damage_grade+has_secondary_use_other,data=damage))
 
 tab <- cbind(tab0, tab1, tab2, tab3, tab4, tab5,
              tab6, tab7, tab8, tab9, tab10)
@@ -529,13 +553,16 @@ plot_teste_fim2 <- ddply(plot_teste_fim_sor, "variable",
 # fins (hoteis, postos de saúde, ...) sofreram danos menores.
 # De repente cabe mencionar na análise quando o percentual de 1 foi menor
 # que o de 3 e quando não.
-
+y_pos <- matrix(plot_teste_fim2$label_ypos, nrow = 3)
+y_pos[2, ] <- apply(y_pos, 2, diff)[1,]/2 + y_pos[1, ]
+y_pos[1, ] <- 5.78
+y_pos[3, ] <- 99.5
 graph <- ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat))) + 
   geom_bar(stat = "identity") + 
   theme_classic() + 
   theme(legend.position = "top", 
         axis.text.x = element_text(angle = 30, hjust = 1, size = 8)) +
-  geom_text(aes(y = label_ypos, label = value),
+  geom_text(aes(y = y_pos, label = value),
             vjust = 0.9, color = "white", size = 3.5) + 
   scale_fill_manual(labels = c("Baixo", "Médio", "Severo"),
                     values = c("1"  = "#482677FF",
@@ -544,4 +571,5 @@ graph <- ggplot(plot_teste_fim2, aes(x = variable, y = value, fill = factor(Cat)
   labs(fill = "Grau de dano", x = "Uso secundário",
        y = "Distribuição do grau de dano")
 
+print(graph)
 remove(list=c("graph"))
