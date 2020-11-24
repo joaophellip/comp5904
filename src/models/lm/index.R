@@ -1,5 +1,5 @@
 #### Linear regression of an Indication Matrix ####
-## This script runs a regression model over the indicator matrix for the earthquake classification problem ##
+## This script fits a regression model over the indicator matrix for the earthquake classification problem ##
 ## outputs objects:
 ##  - in_sample_f1: micro averaged f1 score taken over the training sample.
 ##  - in_sample_performance: hit ratio over the training sample.
@@ -27,7 +27,7 @@ data$generate()
 # dropping some variables from dataset in order to speed up execution time
 drops <- c("geo_level_2_id", "geo_level_3_id")
 
-# expanding basis if basis transtormation is enabled
+# expanding basis if basis transformation is enabled
 if (enable_basis_transformation[1] == TRUE) {
   dataset <- data$dataset[, !(names(data$dataset) %in% drops)]
   if (enable_basis_transformation[2] == 2) {
