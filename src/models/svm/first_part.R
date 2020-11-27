@@ -31,16 +31,16 @@ n <- dim(dataset)[1]
 l <- ceiling(0.6*n)
 training_indexes <- sample(c(1:n), l, FALSE)
 test_indexes <- setdiff(c(1:n), training_indexes)
-dataset <- dataset[training_indexes, ]
+training_dataset <- dataset[training_indexes, ]
 
 # generating a training subset of size l
 n_training <- length(training_indexes)
 l <- 10000
 subset_training_indexes <- sample(c(1:n_training), l, FALSE)
 test_indexes <- setdiff(c(1:n_training), subset_training_indexes)
-sampled_dataset <- dataset[subset_training_indexes, ]
+sampled_dataset <- training_dataset[subset_training_indexes, ]
 sampled_dataset$damage_grade <- factor(sampled_dataset$damage_grade)
-test_dataset <- dataset[test_indexes, ]
+test_dataset <- training_dataset[test_indexes, ]
 test_dataset$damage_grade <- factor(test_dataset$damage_grade)
 
 # transforming factors in dummy variables and scaling training and test datasets linearly

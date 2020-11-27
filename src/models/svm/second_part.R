@@ -14,7 +14,7 @@ if (!require("fastDummies")) {
   library("fastDummies")
 }
 
-# exporting data from imported environment
+# retrieving data from imported environment
 training_indexes <- export_first_part$training_indexes
 dataset <- export_first_part$dataset
 
@@ -70,7 +70,7 @@ cat("--running 5-fold CV for fine-grained grid search----\n")
 type <- "C-classification"
 kernel <- "radial"
 gamma <- 2^seq(-5, -1, by=1)
-cost <- 2^seq(0, 5, by=1)
+cost <- 2^seq(0, 4, by=1)
 
 tuned_grid_search_svm <- tune.svm(damage_grade ~ .,
                             data = scaled_training_dataset,
@@ -81,19 +81,41 @@ print(tuned_grid_search_svm)
 
 cat("--training final classifier over the whole training set (60% of original set)----\n")
 
-# 1) scale whole training_dataset
-# 2) call svm with gamma and cost from best of fine-grained
+# transforming factors in dummy variables and scaling whole training set
+training_dataset <- dummy_cols(dataset, remove_selected_columns = TRUE, select_columns = select_columns)
+training_dataset$damage_grade <- factor(training_dataset$damage_grade)
+scaled_complete_training_dataset <- training_dataset
+scaling_factors <- rep(0, dim(training_dataset)[2])
+scaling_shifts <- rep(0, dim(training_dataset)[2])
+k = 1
+for (predictor in training_dataset) {
+  if (!is.factor(predictor)) {
+    if ((max(predictor) - min(predictor)) != 0) {
+      scaling_factors[k] <- 1/(max(predictor) - min(predictor))
+      scaling_shifts[k] <- min(predictor)/(max(predictor) - min(predictor))
+      scaled_complete_training_dataset[, k] <- predictor*scaling_factors[k] - scaling_shifts[k]
+    } else if (max(predictor) != 0) {
+      scaling_factors[k] <- 1/max(predictor)
+      scaling_shifts[k] <- 0
+      scaled_complete_training_dataset[, k] <- predictor*scaling_factors[k] - scaling_shifts[k]
+    } else {
+      scaling_factors[k] <- 1
+      scaling_shifts[k] <- 0
+      scaled_complete_training_dataset[, k] <- predictor*scaling_factors[k] - scaling_shifts[k]
+    }
+  }
+  k = k + 1
+}
 
-# svm_classifier <- svm(scaled_training_dataset$damage_grade ~ .,
-#                       data = scaled_training_dataset[, !(names(scaled_training_dataset) %in% c("damage_grade"))],
-#                       scale = FALSE, kernel = kernel, type = type, cachesize = 200)
-# in_sample_predictions <- predict(svm_classifier, newdata = scaled_training_dataset[, !(names(scaled_training_dataset) %in% c("damage_grade"))])
-# in_sample_accuracy <-  table(scaled_training_dataset$damage_grade == in_sample_predictions)["TRUE"] / length(scaled_training_dataset$damage_grade)
+# training SVM over the whole training dataset
+best_gamma <- tuned_grid_search_svm$best.parameters$gamma
+best_cost <- tuned_grid_search_svm$best.parameters$cost
+svm_classifier <- svm(scaled_complete_training_dataset$damage_grade ~ .,
+                      data = scaled_complete_training_dataset[, !(names(scaled_complete_training_dataset) %in% c("damage_grade"))],
+                      gamma = best_gamma, cost = best_cost,
+                      scale = FALSE, kernel = kernel, type = type, cachesize = 200)
 
-cat("--predicting samples from test_dataset (reamining 40% of original set)----\n")
-
-# 1) scale whole test_dataset
-# 2) call predict
-
-# out_of_sample_predictions <- predict(svm_classifier, newdata = scaled_test_dataset[, !(names(scaled_test_dataset) %in% c("damage_grade"))])
-# out_of_sample_accuracy <-  table(scaled_test_dataset$damage_grade == out_of_sample_predictions)["TRUE"] / length(scaled_test_dataset$damage_grade)
+# calculating in-sample metrics
+in_sample_predictions <- predict(svm_classifier, newdata = scaled_complete_training_dataset[, !(names(scaled_complete_training_dataset) %in% c("damage_grade"))])
+in_sample_accuracy <-  table(scaled_complete_training_dataset$damage_grade == in_sample_predictions)["TRUE"] / length(scaled_complete_training_dataset$damage_grade)
+in_sample_confusion_matrix <- table(scaled_complete_training_dataset$damage_grade, in_sample_predictions)
