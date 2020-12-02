@@ -421,7 +421,8 @@ table(damage$legal_ownership_status)
 
 
 ### Número de famílias -- count_families
-graph <- damage %>% ggplot(aes(x = count_families, group = damage_grade)) +
+graph <- damage %>% filter(count_families <= 3) %>% 
+  ggplot(aes(x = as.factor(count_families), group = damage_grade)) +
   theme_classic() +
   theme(legend.position = "top") +
   geom_bar(aes(fill = damage_grade), position = "dodge") + 
@@ -429,6 +430,10 @@ graph <- damage %>% ggplot(aes(x = count_families, group = damage_grade)) +
                     values = c("low"  = "#482677FF",
                                "medium" = "#2D708EFF",
                                "severe" = "#73D055FF")) +
+  geom_text(aes(y =..count..,
+                label = scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position = position_dodge(0.9), vjust = -0.9, size = 3) +
+  coord_cartesian(ylim = c(0, 80000)) +
   labs(fill = "Grau de dano", x = "Número de famílias", y = "Número de construções")
 print(graph)
 
