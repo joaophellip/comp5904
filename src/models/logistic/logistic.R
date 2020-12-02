@@ -132,3 +132,46 @@ sig[79:89,] %>%
   theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 8)) +
   geom_hline(yintercept = qnorm(1-0.05/2), linetype = "dashed") +
   labs(x = "Coeficiente", y = "Valor Z")
+
+
+
+### Coeficientes associados à classe 3 em relação à classe 1 ###
+
+# Variáveis geográficas
+sig[2:33,] %>% 
+  ggplot(aes(x = coef, y = Z3)) +
+  theme_classic() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 8)) +
+  geom_hline(yintercept = qnorm(1-0.05/2), linetype = "dashed") +
+  labs(x = "Coeficiente", y = "Valor Z")
+
+# Demais
+sig[c(34:63, 75:78),] %>% 
+  ggplot(aes(x = coef, y = Z3)) +
+  theme_classic() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 8)) +
+  geom_hline(yintercept = qnorm(1-0.05/2), linetype = "dashed") +
+  labs(x = "Coeficiente", y = "Valor Z")
+
+
+# Superestrutura
+sig[64:74,] %>% 
+  ggplot(aes(x = coef, y = Z3)) +
+  theme_classic() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 8)) +
+  geom_hline(yintercept = qnorm(1-0.05/2), linetype = "dashed") +
+  labs(x = "Coeficiente", y = "Valor Z")
+
+# Uso secundário
+sig[79:89,] %>% 
+  ggplot(aes(x = coef, y = Z3)) +
+  theme_classic() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 8)) +
+  geom_hline(yintercept = qnorm(1-0.05/2), linetype = "dashed") +
+  labs(x = "Coeficiente", y = "Valor Z")
+
+
